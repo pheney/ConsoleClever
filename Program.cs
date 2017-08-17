@@ -73,9 +73,9 @@ namespace ConsoleClever
 
             string url = baseUrl
                 + keyTemplate.Replace("{key}", decrypt(key, de))
-                + "&" + inputTempalte.Replace("{input}", input)
-                + "&" + stateTemplate.Replace("{cs}", cs);
-
+                + "&" + inputTempalte.Replace("{input}", input);
+            
+            if (!string.IsNullOrWhiteSpace(cs)) url += "&" + stateTemplate.Replace("{cs}", cs);
 
             //  Build the web request
             WebRequest webRequest = WebRequest.Create(url);
