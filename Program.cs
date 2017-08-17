@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -20,21 +20,73 @@ namespace ConsoleClever
             bool exit = false;
             string reply ="", input;
 
+            cs = GetConversationToken(csFile);
+
             while (!exit)
             {
                 if (!string.IsNullOrWhiteSpace(reply))
                 {
                     Console.CursorLeft = 0;
-                    Console.WriteLine("Bot: " + reply);
+                    Console.ForegroundColor = botColor;
+                    Console.WriteLine("BOT: " + reply);
                 }
+                Console.ForegroundColor = userColor;
                 Console.Write("You: ");
                 input = Console.ReadLine();
                 exit = string.IsNullOrWhiteSpace(input);
                 if (!exit)
                 {
+                    Console.ForegroundColor = botColor;
                     Console.Write("...");
                     reply = GetReply(input);
                 }
+            }
+
+            PutConversationToken(csFile, cs);
+        }
+
+        private static ConsoleColor userColor = ConsoleColor.Green;
+        private static ConsoleColor botColor = ConsoleColor.Magenta;
+        private static ConsoleColor systemColor = ConsoleColor.White;
+        private static ConsoleColor warningColor = ConsoleColor.Yellow;
+
+        private static string csFile = "ConversationToken.txt";
+        private static string cs;
+
+        private static string GetConversationToken(string fileName)
+        {
+            string result = "";
+
+            try
+            {
+                result = System.IO.File.ReadAllText(fileName);
+                Console.ForegroundColor = systemColor;
+                Console.WriteLine("Previous conversation loaded. Welcome back.");
+            }
+            catch (Exception)
+            {
+                //  ignore
+                Console.ForegroundColor = warningColor;
+                Console.WriteLine("Unable to load conversation token. This will be a new conversation.");
+            }
+
+            return result;
+        }
+
+        private static void PutConversationToken(string fileName, string token)
+        {
+            try
+            {
+                System.IO.File.WriteAllText(fileName, token);
+                Console.ForegroundColor = systemColor;
+                Console.WriteLine("Conversation saved");
+                Console.ReadLine();
+            }
+            catch (Exception)
+            {
+                Console.ForegroundColor = warningColor;
+                Console.WriteLine("Unabled to save conversation token: " + cs);
+                Console.ReadLine();
             }
         }
 
@@ -52,7 +104,6 @@ namespace ConsoleClever
         static string key = "kv85jCC3ypppmqcLrWHip1cdFZrloGIQ";
         static string de = "5";
 
-        private static string cs;
 
         /// <summary>
         /// Sample response:
@@ -74,9 +125,9 @@ namespace ConsoleClever
             string url = baseUrl
                 + keyTemplate.Replace("{key}", decrypt(key, de))
                 + "&" + inputTempalte.Replace("{input}", input);
-            
-            if (!string.IsNullOrWhiteSpace(cs)) url += "&" + stateTemplate.Replace("{cs}", cs);
 
+            if (!string.IsNullOrWhiteSpace(cs)) url += "&" + stateTemplate.Replace("{cs}", cs);
+            
             //  Build the web request
             WebRequest webRequest = WebRequest.Create(url);
             webRequest.ContentType = "application/json";
